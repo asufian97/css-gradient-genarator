@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Send } from 'lucide-react';
+import emailjs from '@emailjs/browser';
 
 const Newsletter: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -11,23 +12,24 @@ const Newsletter: React.FC = () => {
     setStatus('loading');
 
     try {
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: new URLSearchParams({
-          'form-name': 'newsletter',
-          email
-        }).toString()
-      });
+      const templateParams = {
+        to_email: 'sufianwp97dot@gmail.com',
+        from_email: email,
+        message: `New subscription request from: ${email}`
+      };
 
-      if (response.ok) {
-        setStatus('success');
-        setMessage('Thanks for subscribing!');
-        setEmail('');
-      } else {
-        throw new Error('Submission failed');
-      }
+      await emailjs.send(
+        'service_kj0csyf', // Replace with your EmailJS service ID
+        'template_t27jg84', // Replace with your EmailJS template ID
+        templateParams,
+        'TVFapTGNCmh4f6J74' // Replace with your EmailJS public key
+      );
+
+      setStatus('success');
+      setMessage('Thanks for subscribing! You will receive updates soon.');
+      setEmail('');
     } catch (error) {
+      console.error('Newsletter submission error:', error);
       setStatus('error');
       setMessage('Oops! Something went wrong. Please try again.');
     }
@@ -46,14 +48,10 @@ const Newsletter: React.FC = () => {
         <form
           onSubmit={handleSubmit}
           className="flex flex-col sm:flex-row gap-3"
-          data-netlify="true"
-          name="newsletter"
         >
-          <input type="hidden" name="form-name" value="newsletter" />
           <div className="flex-1">
             <input
               type="email"
-              name="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
